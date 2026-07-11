@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ইউনিয়ন তথ্য নিবন্ধন | Data Registry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f8f4;
+    --surface:#ffffff;
+    --surface-alt:#eef6f0;
+    --border:#e0ebe3;
+    --border-strong:#cfe3d5;
+    --green-900:#0c3b25;
+    --green-800:#0f4c30;
+    --green-700:#146c3f;
+    --green-600:#1a8a50;
+    --green-500:#26a35d;
+    --green-100:#e4f4e9;
+    --green-50:#f1faf4;
+    --text:#152318;
+    --text-muted:#5c7669;
+    --text-faint:#96ac9e;
+    --danger:#c0392b;
+    --danger-bg:#fbeae8;
+    --radius:18px;
+    --radius-sm:12px;
+    --shadow-sm:0 1px 2px rgba(12,59,37,0.05), 0 6px 16px -10px rgba(12,59,37,0.10);
+    --shadow-md:0 4px 10px rgba(12,59,37,0.05), 0 16px 32px -16px rgba(12,59,37,0.16);
+    --font-display:'Noto Serif Bengali', serif;
+    --font-body:'Hind Siliguri', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--font-body);
+    background:
+      radial-gradient(circle at 12% -5%, rgba(38,163,93,0.08), transparent 40%),
+      radial-gradient(circle at 100% 0%, rgba(20,108,63,0.05), transparent 35%),
+      var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:'';
+    position:fixed; inset:0;
+    background-image: radial-gradient(rgba(12,59,37,0.05) 1px, transparent 1px);
+    background-size:24px 24px;
+    pointer-events:none;
+    z-index:0;
+    opacity:0.6;
+    mask-image:linear-gradient(180deg, black, transparent 60%);
+  }
+  ::selection{background:var(--green-100); color:var(--green-900);}
+  ::-webkit-scrollbar{width:8px; height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--border-strong); border-radius:10px;}
+
+  .app{position:relative; z-index:1; display:flex; min-height:100vh;}
+
+  /* ---------- Icon badge helper ---------- */
+  .icon-badge{
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    border-radius:10px;
+  }
+  .icon-badge svg{display:block;}
+
+  /* ---------- Sidebar (desktop) ---------- */
+  .sidebar{
+    display:none;
+    width:246px;
+    flex-shrink:0;
+    padding:26px 16px;
+    border-right:1px solid var(--border);
+    background:var(--surface);
+    position:sticky; top:0; height:100vh;
+  }
+  .brand{display:flex; align-items:center; gap:11px; padding:4px 8px 24px 8px; border-bottom:1px solid var(--border); margin-bottom:18px;}
+  .brand-mark{
+    width:40px; height:40px; border-radius:11px; flex-shrink:0;
+    background:linear-gradient(150deg, var(--green-600), var(--green-900));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; color:#fff; font-size:18px;
+    box-shadow:var(--shadow-sm);
+  }
+  .brand-text .t1{font-family:var(--font-display); font-weight:600; font-size:15px; line-height:1.25; color:var(--green-900);}
+  .brand-text .t2{font-size:10.5px; color:var(--text-faint); letter-spacing:0.06em; margin-top:1px;}
+
+  .nav-item{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 12px; border-radius:var(--radius-sm);
+    color:var(--text-muted); cursor:pointer; font-size:14.5px; font-weight:500;
+    margin-bottom:5px; transition:background .2s ease, color .2s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .nav-item .icon-badge{width:32px; height:32px; background:var(--surface-alt);}
+  .nav-item svg{width:17px; height:17px; stroke:var(--text-muted); transition:stroke .2s ease;}
+  .nav-item:hover{background:var(--green-50); color:var(--green-800);}
+  .nav-item.active{background:var(--green-700); color:#fff; box-shadow:var(--shadow-sm);}
+  .nav-item.active .icon-badge{background:rgba(255,255,255,0.16);}
+  .nav-item.active svg{stroke:#fff;}
+
+  /* ---------- Main ---------- */
+  .main{flex:1; min-width:0; padding:20px 16px 104px 16px;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px;}
+  .topbar h1{font-family:var(--font-display); font-size:20px; font-weight:600; color:var(--green-900);}
+  .topbar .sub{font-size:12.5px; color:var(--text-faint); margin-top:3px;}
+  .date-chip{
+    display:flex; align-items:center; gap:6px;
+    font-family:var(--font-mono); font-size:11px; color:var(--green-700);
+    background:var(--green-50); border:1px solid var(--border-strong);
+    padding:7px 13px; border-radius:20px; white-space:nowrap;
+  }
+  .date-chip svg{width:13px; height:13px; stroke:var(--green-600);}
+
+  .view{display:none; animation:fadeUp .4s ease;}
+  .view.active{display:block;}
+  @keyframes fadeUp{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---------- Dashboard ---------- */
+  .stat-row{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:22px;}
+  .stat-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:16px; position:relative; box-shadow:var(--shadow-sm);
+  }
+  .stat-card .head-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .stat-card .icon-badge{width:34px; height:34px; background:var(--green-100);}
+  .stat-card .icon-badge svg{width:17px; height:17px; stroke:var(--green-700);}
+  .stat-card.alt .icon-badge{background:#eaf6ee;}
+  .stat-card .num{font-family:var(--font-mono); font-size:25px; font-weight:700; color:var(--green-800); line-height:1;}
+  .stat-card .lbl{font-size:11.5px; color:var(--text-muted); margin-top:6px;}
+
+  .section-title{
+    font-family:var(--font-display); font-size:15px; font-weight:600; color:var(--green-900);
+    margin:24px 0 12px 0; display:flex; align-items:center; gap:9px;
+  }
+  .section-title .icon-badge{width:26px; height:26px; background:var(--green-100); border-radius:8px;}
+  .section-title .icon-badge svg{width:13px; height:13px; stroke:var(--green-700);}
+
+  .union-grid{display:grid; grid-template-columns:1fr; gap:12px;}
+  .union-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:17px; position:relative; box-shadow:var(--shadow-sm);
+    border-left:3px solid var(--green-500);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .union-card:hover{transform:translateY(-2px); box-shadow:var(--shadow-md);}
+  .union-card .row1{display:flex; justify-content:space-between; align-items:flex-start; gap:12px;}
+  .union-card .name-wrap{display:flex; align-items:center; gap:10px; min-width:0;}
+  .union-card .icon-badge{width:34px; height:34px; background:var(--green-50); border:1px solid var(--border-strong); flex-shrink:0;}
+  .union-card .icon-badge svg{width:16px; height:16px; stroke:var(--green-700);}
+  .union-card .name{font-family:var(--font-display); font-size:15px; font-weight:600; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .union-card .pct{font-size:11px; color:var(--text-faint); margin-top:2px;}
+  .union-card .count{font-family:var(--font-mono); font-size:23px; font-weight:700; color:var(--green-700); line-height:1; flex-shrink:0;}
+  .bar-track{height:6px; background:var(--surface-alt); border-radius:6px; margin-top:14px; overflow:hidden;}
+  .bar-fill{height:100%; background:linear-gradient(90deg, var(--green-500), var(--green-700)); border-radius:6px; transition:width .6s ease;}
+
+  .empty-state{
+    text-align:center; padding:46px 20px; color:var(--text-faint);
+    border:1.5px dashed var(--border-strong); border-radius:var(--radius); background:var(--surface);
+  }
+  .empty-state .icon-badge{width:52px; height:52px; background:var(--green-50); border-radius:16px; margin:0 auto 14px auto;}
+  .empty-state .icon-badge svg{width:24px; height:24px; stroke:var(--green-500);}
+  .empty-state p{font-size:13.5px; margin-top:2px; color:var(--text-muted);}
+  .empty-state .cta{
+    display:inline-flex; align-items:center; gap:6px; margin-top:16px; padding:10px 20px; border-radius:20px;
+    background:var(--green-700); color:#fff; font-weight:600; font-size:13px; cursor:pointer; border:none;
+    box-shadow:var(--shadow-sm);
+  }
+
+  /* ---------- Form ---------- */
+  .card-panel{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow-sm);}
+  .field{margin-bottom:17px;}
+  .field label{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-muted); margin-bottom:8px; font-weight:600;}
+  .field label .req{color:var(--green-600);}
+  .serial-display{
+    display:flex; align-items:center; gap:13px; background:var(--green-50);
+    border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:12px 16px; margin-bottom:19px;
+  }
+  .serial-display .icon-badge{width:38px; height:38px; background:var(--green-700); border-radius:10px; flex-shrink:0;}
+  .serial-display .icon-badge svg{width:16px; height:16px; stroke:#fff;}
+  .serial-display .box{font-family:var(--font-mono); font-size:19px; font-weight:700; color:var(--green-800); min-width:40px;}
+  .serial-display .txt{font-size:11.5px; color:var(--text-muted); line-height:1.4;}
+  select, textarea, input[type=text]{
+    width:100%; background:var(--surface); border:1.5px solid var(--border);
+    color:var(--text); font-family:var(--font-body); font-size:14.5px; padding:12px 14px;
+    border-radius:var(--radius-sm); outline:none; transition:border-color .2s ease, box-shadow .2s ease;
+    -webkit-appearance:none; appearance:none;
+  }
+  select:focus, textarea:focus, input[type=text]:focus{border-color:var(--green-500); box-shadow:0 0 0 3px var(--green-100);}
+  textarea{resize:vertical; min-height:88px; line-height:1.6;}
+  select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235c7669' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat; background-position:right 14px center; padding-left:14px; padding-right:40px;
+  }
+  .btn-primary{
+    width:100%; padding:14px; border-radius:var(--radius-sm); border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--green-600), var(--green-800)); color:#fff;
+    font-family:var(--font-body); font-weight:700; font-size:15px;
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    box-shadow:0 10px 22px -10px rgba(15,76,48,0.55);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary svg{width:17px; height:17px; stroke:#fff; flex-shrink:0;}
+  .btn-primary:active{transform:scale(0.98);}
+  .btn-secondary{
+    padding:12px 16px; border-radius:var(--radius-sm); border:1.5px solid var(--border);
+    background:var(--surface); color:var(--text-muted); font-family:var(--font-body); font-weight:600; font-size:13.5px;
+    cursor:pointer; display:flex; align-items:center; gap:7px; justify-content:center;
+  }
+  .btn-secondary svg{width:14px; height:14px; flex-shrink:0;}
+  .form-actions{display:flex; gap:10px; margin-top:2px;}
+  .form-actions .btn-primary{flex:1;}
+
+  /* ---------- List / Table ---------- */
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;}
+  .search-wrap{position:relative; flex:1; min-width:150px;}
+  .search-wrap svg{position:absolute; left:13px; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:var(--text-faint); pointer-events:none;}
+  .search-wrap input{padding-left:38px;}
+  .toolbar select{min-width:140px;}
+  .toolbar .export-btn{
+    background:var(--green-700); border:none; color:#fff;
+    padding:12px 18px; border-radius:var(--radius-sm); font-weight:600; font-size:13.5px; cursor:pointer;
+    display:flex; align-items:center; gap:8px; white-space:nowrap; box-shadow:0 8px 18px -10px rgba(15,76,48,0.6);
+  }
+  .toolbar .export-btn svg{width:15px; height:15px; stroke:#fff; flex-shrink:0;}
+  .entry-list{display:flex; flex-direction:column; gap:10px;}
+  .entry-row{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:14px 15px; display:flex; gap:13px; align-items:flex-start; box-shadow:var(--shadow-sm);
+  }
+  .entry-row .sn{
+    font-family:var(--font-mono); font-weight:700; color:var(--green-700); font-size:13.5px;
+    background:var(--green-100); border-radius:9px; padding:8px 6px; flex-shrink:0; min-width:36px; text-align:center;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .entry-row .body{flex:1; min-width:0; padding-top:2px;}
+  .entry-row .u-name{display:flex; align-items:center; gap:6px; font-weight:600; font-size:13.5px; color:var(--green-800); margin-bottom:4px;}
+  .entry-row .u-name svg{width:12px; height:12px; stroke:var(--green-500); flex-shrink:0;}
+  .entry-row .addr{font-size:13px; color:var(--text-muted); line-height:1.55; word-break:break-word;}
+  .entry-row .acts{display:flex; gap:7px; flex-shrink:0; padding-top:1px;}
+  .icon-btn{
+    width:32px; height:32px; border-radius:9px; border:1.5px solid var(--border); background:var(--surface);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted); flex-shrink:0;
+  }
+  .icon-btn svg{width:14px; height:14px; stroke:var(--text-muted);}
+  .icon-btn:hover{border-color:var(--green-500); background:var(--green-50);}
+  .icon-btn:hover svg{stroke:var(--green-700);}
+  .icon-btn.danger:hover{border-color:var(--danger); background:var(--danger-bg);}
+  .icon-btn.danger:hover svg{stroke:var(--danger);}
+
+  /* ---------- Settings ---------- */
+  .union-manage-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:11px 13px; margin-bottom:9px;
+  }
+  .union-manage-item .left{display:flex; align-items:center; gap:11px; min-width:0;}
+  .union-manage-item .icon-badge{width:30px; height:30px; background:var(--green-100); border-radius:9px; flex-shrink:0;}
+  .union-manage-item .icon-badge svg{width:14px; height:14px; stroke:var(--green-700);}
+  .union-manage-item span{font-size:13.5px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text);}
+  .union-manage-item .right{display:flex; align-items:center; gap:11px; flex-shrink:0;}
+  .union-manage-item .cnt{font-family:var(--font-mono); font-size:11px; color:var(--text-faint);}
+  .add-union-row{display:flex; gap:9px; margin-top:15px;}
+  .add-union-row input{flex:1;}
+  .add-union-row button{
+    background:var(--green-700); color:#fff; border:none; border-radius:var(--radius-sm); padding:0 20px;
+    font-weight:600; cursor:pointer; font-size:13.5px; display:flex; align-items:center; gap:6px;
+    box-shadow:0 6px 14px -8px rgba(15,76,48,0.6);
+  }
+  .add-union-row button svg{width:14px; height:14px; stroke:#fff;}
+
+  /* ---------- Bottom nav (mobile) ---------- */
+  .bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; z-index:20;
+    display:flex; align-items:flex-end; justify-content:center;
+    background:rgba(255,255,255,0.92); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-top:1px solid var(--border); padding:10px 4px calc(10px + env(safe-area-inset-bottom));
+    box-shadow:0 -8px 24px rgba(12,59,37,0.06);
+  }
+  .bnav-side{
+    flex:1 1 0; min-width:0;
+    display:flex; align-items:center; justify-content:space-evenly;
+  }
+  .bnav-fab-wrap{
+    flex:0 0 auto; width:76px;
+    display:flex; align-items:flex-start; justify-content:center;
+  }
+  .bnav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-faint);
+    font-size:10px; font-weight:600; padding:5px 7px; border-radius:12px; transition:color .2s ease;
+    -webkit-tap-highlight-color:transparent; cursor:pointer; white-space:nowrap;
+  }
+  .bnav-item .icon-badge{width:24px; height:24px;}
+  .bnav-item svg{width:21px; height:21px; stroke:var(--text-faint); transition:stroke .2s ease;}
+  .bnav-item.active{color:var(--green-700);}
+  .bnav-item.active svg{stroke:var(--green-700);}
+  .bnav-item.fab{
+    background:linear-gradient(150deg, var(--green-500), var(--green-800)); color:#fff; width:56px; height:56px;
+    border-radius:50%; margin-top:-24px; box-shadow:0 10px 22px -6px rgba(15,76,48,0.6); padding:0;
+    border:3px solid var(--bg);
+  }
+  .bnav-item.fab .icon-badge{width:100%; height:100%;}
+  .bnav-item.fab svg{stroke:#fff; width:22px; height:22px;}
+
+  /* ---------- Toast & Modal ---------- */
+  .toast{
+    position:fixed; bottom:98px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--green-900); color:#fff; padding:12px 20px 12px 14px;
+    border-radius:30px; font-size:13.5px; z-index:60; opacity:0; pointer-events:none;
+    transition:all .3s ease; display:flex; align-items:center; gap:9px; box-shadow:0 14px 34px rgba(12,59,37,0.35);
+    white-space:nowrap;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast .icon-badge{width:22px; height:22px; background:rgba(255,255,255,0.16); border-radius:50%; flex-shrink:0;}
+  .toast .icon-badge svg{width:12px; height:12px; stroke:#fff;}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(12,30,20,0.45); backdrop-filter:blur(3px); z-index:70;
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--surface); border:1px solid var(--border); border-radius:22px 22px 0 0; padding:24px 20px;
+    width:100%; max-width:460px; animation:slideUp .3s ease; box-shadow:0 -10px 40px rgba(12,59,37,0.2);
+  }
+  @keyframes slideUp{from{transform:translateY(40px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+  .modal-box .icon-badge{width:44px; height:44px; background:var(--danger-bg); border-radius:14px; margin-bottom:14px;}
+  .modal-box .icon-badge svg{width:20px; height:20px; stroke:var(--danger);}
+  .modal-box h3{font-family:var(--font-display); font-size:16px; margin-bottom:8px; color:var(--green-900);}
+  .modal-box p{font-size:13.5px; color:var(--text-muted); line-height:1.6; margin-bottom:18px;}
+  .modal-actions{display:flex; gap:10px;}
+  .modal-actions button{flex:1; padding:12px; border-radius:12px; font-weight:600; font-size:13.5px; cursor:pointer; border:none;}
+  .modal-actions .cancel{background:var(--surface-alt); color:var(--text-muted); border:1.5px solid var(--border);}
+  .modal-actions .confirm{background:var(--danger); color:#fff;}
+
+  @media(min-width:768px){
+    .sidebar{display:block;}
+    .bottom-nav{display:none;}
+    .main{padding:38px 44px 44px 44px; max-width:940px;}
+    .stat-row{grid-template-columns:repeat(4,1fr);}
+    .union-grid{grid-template-columns:repeat(2,1fr);}
+    .form-actions{max-width:420px;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Desktop sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">ন</div>
+      <div class="brand-text">
+        <div class="t1">তথ্য নিবন্ধন</div>
+        <div class="t2">DATA REGISTRY</div>
+      </div>
+    </div>
+    <div class="nav-item active" data-view="dashboard">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+      ড্যাশবোর্ড
+    </div>
+    <div class="nav-item" data-view="entry">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></div>
+      নতুন এন্ট্রি
+    </div>
+    <div class="nav-item" data-view="list">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
+      সকল এন্ট্রি
+    </div>
+    <div class="nav-item" data-view="settings">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      সেটিংস
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">ড্যাশবোর্ড</h1>
+        <div class="sub" id="pageSub">সকল ইউনিয়নের তথ্য সারসংক্ষেপ</div>
+      </div>
+      <div class="date-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span id="dateChip">—</span>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <section class="view active" id="view-dashboard">
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="head-row">
+            <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h9"/></svg></div>
+          </div>
+          <div class="num" id="statTotal">0</div>
+          <div class="lbl">মোট এন্ট্রি</div>
+        </div>
+        <div class="stat-card alt">
+          <div class="head-row">
+            <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M14 9h1M14 13h1"/></svg></div>
+          </div>
+          <div class="num" id="statUnions">0</div>
+          <div class="lbl">সক্রিয় ইউনিয়ন</div>
+        </div>
+        <div class="stat-card">
+          <div class="head-row">
+            <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          </div>
+          <div class="num" id="statToday">0</div>
+          <div class="lbl">আজকের এন্ট্রি</div>
+        </div>
+        <div class="stat-card alt">
+          <div class="head-row">
+            <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+          </div>
+          <div class="num" id="statAvg">0</div>
+          <div class="lbl">গড় / ইউনিয়ন</div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg></div>
+        ইউনিয়ন ভিত্তিক সারসংক্ষেপ
+      </div>
+      <div class="union-grid" id="unionGrid"></div>
+    </section>
+
+    <!-- Entry Form -->
+    <section class="view" id="view-entry">
+      <div class="card-panel">
+        <div class="serial-display">
+          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+          <div class="box" id="nextSerial">০১</div>
+          <div class="txt">ক্রম নম্বর — স্বয়ংক্রিয়ভাবে নির্ধারিত</div>
+        </div>
+        <form id="entryForm">
+          <div class="field">
+            <label><span class="req">●</span>ইউনিয়ন</label>
+            <select id="unionSelect" required></select>
+          </div>
+          <div class="field">
+            <label><span class="req">●</span>স্থায়ী ঠিকানা</label>
+            <textarea id="addressInput" placeholder="গ্রাম, ডাকঘর, উপজেলা, জেলা লিখুন" required></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="submitBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+              এন্ট্রি সংরক্ষণ করুন
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- List -->
+    <section class="view" id="view-list">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" placeholder="ঠিকানা দিয়ে খুঁজুন...">
+        </div>
+        <select id="filterUnion"><option value="">সব ইউনিয়ন</option></select>
+        <button class="export-btn" id="exportBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l3 3 3-3M12 12v6"/></svg>
+          Word এক্সপোর্ট
+        </button>
+      </div>
+      <div class="entry-list" id="entryList"></div>
+    </section>
+
+    <!-- Settings -->
+    <section class="view" id="view-settings">
+      <div class="section-title">
+        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M14 9h1M14 13h1"/></svg></div>
+        ইউনিয়ন তালিকা পরিচালনা
+      </div>
+      <div class="card-panel">
+        <div id="unionManageList"></div>
+        <div class="add-union-row">
+          <input type="text" id="newUnionInput" placeholder="নতুন ইউনিয়নের নাম লিখুন">
+          <button id="addUnionBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+            যোগ করুন
+          </button>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg></div>
+        ডেটা ব্যবস্থাপনা
+      </div>
+      <div class="card-panel">
+        <div class="field" style="margin-bottom:0;">
+          <label>মোট সংরক্ষিত এন্ট্রি: <span id="settingsTotalCount" style="color:var(--green-700); font-family:var(--font-mono);">0</span></label>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:14px;">
+          <button class="btn-secondary" id="exportAllSettingsBtn" style="flex:1;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+            সম্পূর্ণ ব্যাকআপ (Word)
+          </button>
+          <button class="btn-secondary" id="clearAllBtn" style="flex:1; color:var(--danger); border-color:#f0c9c3;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
+            সব মুছে ফেলুন
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <div class="bnav-side left">
+    <div class="bnav-item active" data-view="dashboard">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+      হোম
+    </div>
+    <div class="bnav-item" data-view="list">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
+      তালিকা
+    </div>
+  </div>
+  <div class="bnav-fab-wrap">
+    <div class="bnav-item fab" data-view="entry">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></div>
+    </div>
+  </div>
+  <div class="bnav-side right">
+    <div class="bnav-item" id="bnavExport">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l3 3 3-3M12 12v6"/></svg></div>
+      এক্সপোর্ট
+    </div>
+    <div class="bnav-item" data-view="settings">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      সেটিংস
+    </div>
+  </div>
+</nav>
+
+<div class="toast" id="toast">
+  <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+  <span id="toastText">সংরক্ষিত হয়েছে</span>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div>
+    <h3 id="modalTitle">নিশ্চিত করুন</h3>
+    <p id="modalText">আপনি কি নিশ্চিত?</p>
+    <div class="modal-actions">
+      <button class="cancel" id="modalCancel">বাতিল</button>
+      <button class="confirm" id="modalConfirm">মুছে ফেলুন</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="exportModalOverlay">
+  <div class="modal-box">
+    <div class="icon-badge" style="background:var(--green-100);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--green-700)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l3 3 3-3M12 12v6"/></svg>
+    </div>
+    <h3>Word এক্সপোর্ট</h3>
+    <p>কোন ইউনিয়নের তথ্য এক্সপোর্ট করতে চান তা বেছে নিন।</p>
+    <div class="field" style="margin-bottom:6px;">
+      <label>ইউনিয়ন নির্বাচন করুন</label>
+      <select id="exportUnionSelect"><option value="">সব ইউনিয়ন (সব ডেটা)</option></select>
+    </div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="cancel" id="exportModalCancel">বাতিল</button>
+      <button class="confirm" id="exportModalConfirm" style="background:var(--green-700);">
+        এক্সপোর্ট করুন
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- State ---------------- */
+  const STORAGE_KEY = "unionRegistry_entries_v1";
+  const UNIONS_KEY  = "unionRegistry_unions_v1";
+
+  let storageOK = true;
+  function safeLoad(key){
+    try{
+      return JSON.parse(localStorage.getItem(key) || "[]");
+    }catch(err){
+      console.error('storage read failed:', key, err);
+      storageOK = false;
+      return [];
+    }
+  }
+  function safeSave(key, value){
+    try{
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    }catch(err){
+      console.error('storage write failed:', key, err);
+      storageOK = false;
+      return false;
+    }
+  }
+
+  let entries = safeLoad(STORAGE_KEY);
+  let unions  = safeLoad(UNIONS_KEY);
+  let editingId = null;
+  let pendingDeleteAction = null;
+
+  function persistEntries(){
+    const ok = safeSave(STORAGE_KEY, entries);
+    if(!ok) showToast('সতর্কতা: ডেটা স্থায়ীভাবে সংরক্ষণ করা যায়নি');
+    return ok;
+  }
+  function persistUnions(){
+    const ok = safeSave(UNIONS_KEY, unions);
+    if(!ok) showToast('সতর্কতা: ডেটা স্থায়ীভাবে সংরক্ষণ করা যায়নি');
+    return ok;
+  }
+
+  /* ---------------- Utils ---------------- */
+  const bnDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+  function toBn(num){
+    return String(num).split('').map(ch => /[0-9]/.test(ch) ? bnDigits[+ch] : ch).join('');
+  }
+  function sortedEntries(){
+    return [...entries].sort((a,b)=> a.createdAt - b.createdAt);
+  }
+  function serialOf(id){
+    const list = sortedEntries();
+    return list.findIndex(e => e.id === id) + 1;
+  }
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._tm);
+    showToast._tm = setTimeout(()=> t.classList.remove('show'), 2200);
+  }
+  function openModal(title, text, onConfirm){
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalText').textContent = text;
+    pendingDeleteAction = onConfirm;
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+  function closeModal(){
+    document.getElementById('modalOverlay').classList.remove('show');
+    pendingDeleteAction = null;
+  }
+  document.getElementById('modalCancel').addEventListener('click', closeModal);
+  document.getElementById('modalConfirm').addEventListener('click', ()=>{
+    if(pendingDeleteAction) pendingDeleteAction();
+    closeModal();
+  });
+  document.getElementById('modalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'modalOverlay') closeModal();
+  });
+
+  /* ---------------- Navigation ---------------- */
+  const titles = {
+    dashboard:["ড্যাশবোর্ড","সকল ইউনিয়নের তথ্য সারসংক্ষেপ"],
+    entry:["নতুন এন্ট্রি","নতুন তথ্য যুক্ত করুন"],
+    list:["সকল এন্ট্রি","সংরক্ষিত সকল তথ্য দেখুন ও পরিচালনা করুন"],
+    settings:["সেটিংস","ইউনিয়ন তালিকা ও ডেটা ব্যবস্থাপনা"]
+  };
+  function setView(name){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
+    document.querySelectorAll('.bnav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
+    document.getElementById('pageTitle').textContent = titles[name][0];
+    document.getElementById('pageSub').textContent = titles[name][1];
+    if(name === 'entry' && editingId === null) resetForm();
+    if(name === 'dashboard') renderDashboard();
+    if(name === 'list') renderList();
+    if(name === 'settings') renderSettings();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  document.querySelectorAll('[data-view]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(el.dataset.view === 'entry'){ editingId = null; }
+      setView(el.dataset.view);
+    });
+  });
+
+  /* ---------------- Union select population ---------------- */
+  function populateUnionSelects(){
+    const sel = document.getElementById('unionSelect');
+    const filt = document.getElementById('filterUnion');
+    const currentSel = sel.value;
+    const currentFilt = filt.value;
+    sel.innerHTML = unions.length
+      ? unions.map(u=>`<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('')
+      : `<option value="">প্রথমে সেটিংসে ইউনিয়ন যোগ করুন</option>`;
+    if(unions.includes(currentSel)) sel.value = currentSel;
+
+    filt.innerHTML = `<option value="">সব ইউনিয়ন</option>` + unions.map(u=>`<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
+    if(unions.includes(currentFilt)) filt.value = currentFilt;
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  /* ---------------- Dashboard ---------------- */
+  function renderDashboard(){
+    document.getElementById('statTotal').textContent = toBn(entries.length);
+    document.getElementById('statUnions').textContent = toBn(unions.length);
+    const todayStr = new Date().toDateString();
+    const todayCount = entries.filter(e => new Date(e.createdAt).toDateString() === todayStr).length;
+    document.getElementById('statToday').textContent = toBn(todayCount);
+    const avg = unions.length ? Math.round(entries.length / unions.length) : 0;
+    document.getElementById('statAvg').textContent = toBn(avg);
+
+    const grid = document.getElementById('unionGrid');
+    if(unions.length === 0){
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg></div>
+        <p>এখনও কোনো ইউনিয়ন যোগ করা হয়নি।</p>
+        <button class="cta" onclick="document.querySelector('[data-view=settings]').click()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+          ইউনিয়ন যোগ করুন
+        </button>
+      </div>`;
+      return;
+    }
+    const counts = unions.map(u => ({name:u, count: entries.filter(e=>e.union===u).length}));
+    counts.sort((a,b)=> b.count - a.count);
+    const max = Math.max(1, ...counts.map(c=>c.count));
+    grid.innerHTML = counts.map(c => {
+      const pct = entries.length ? Math.round((c.count/entries.length)*100) : 0;
+      const width = Math.round((c.count/max)*100);
+      return `<div class="union-card">
+        <div class="row1">
+          <div class="name-wrap">
+            <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M14 9h1M14 13h1"/></svg></div>
+            <div>
+              <div class="name">${escapeHtml(c.name)}</div>
+              <div class="pct">মোট এন্ট্রির ${toBn(pct)}%</div>
+            </div>
+          </div>
+          <div class="count">${toBn(c.count)}</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---------------- Entry Form ---------------- */
+  const form = document.getElementById('entryForm');
+  function resetForm(){
+    editingId = null;
+    form.reset();
+    populateUnionSelects();
+    document.getElementById('nextSerial').textContent = toBn(entries.length + 1);
+    document.getElementById('submitBtn').innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+      এন্ট্রি সংরক্ষণ করুন`;
+  }
+  function startEdit(id){
+    const e = entries.find(x=>x.id===id);
+    if(!e) return;
+    editingId = id;
+    setView('entry');
+    populateUnionSelects();
+    document.getElementById('unionSelect').value = e.union;
+    document.getElementById('addressInput').value = e.address;
+    document.getElementById('nextSerial').textContent = toBn(serialOf(id));
+    document.getElementById('submitBtn').innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+      পরিবর্তন সংরক্ষণ করুন`;
+  }
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    if(unions.length === 0){ showToast('প্রথমে সেটিংস থেকে ইউনিয়ন যোগ করুন'); return; }
+    const union = document.getElementById('unionSelect').value;
+    const address = document.getElementById('addressInput').value.trim();
+    if(!union || !address){ showToast('সব ঘর পূরণ করুন'); return; }
+
+    try{
+      if(editingId){
+        const e = entries.find(x=>x.id===editingId);
+        e.union = union; e.address = address;
+        persistEntries();
+        showToast('এন্ট্রি আপডেট হয়েছে');
+      } else {
+        entries.push({ id: 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,7), union, address, createdAt: Date.now() });
+        persistEntries();
+        showToast('নতুন এন্ট্রি সংরক্ষিত হয়েছে');
+      }
+    } catch(err){
+      console.error('save failed:', err);
+      showToast('সংরক্ষণে সমস্যা হয়েছে, তবে এন্ট্রিটি তালিকায় দেখাচ্ছে');
+    }
+    resetForm();
+    setView('list');
+  });
+
+  /* ---------------- List ---------------- */
+  const searchInput = document.getElementById('searchInput');
+  const filterUnion = document.getElementById('filterUnion');
+  searchInput.addEventListener('input', renderList);
+  filterUnion.addEventListener('change', renderList);
+
+  function currentFilteredEntries(){
+    const q = searchInput.value.trim().toLowerCase();
+    const uf = filterUnion.value;
+    return sortedEntries().filter(e=>{
+      const matchQ = !q || e.address.toLowerCase().includes(q);
+      const matchU = !uf || e.union === uf;
+      return matchQ && matchU;
+    });
+  }
+
+  function renderList(){
+    populateUnionSelects();
+    const list = currentFilteredEntries();
+    const container = document.getElementById('entryList');
+    if(entries.length === 0){
+      container.innerHTML = `<div class="empty-state">
+        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h7"/></svg></div>
+        <p>এখনও কোনো এন্ট্রি যুক্ত করা হয়নি।</p>
+        <button class="cta" onclick="document.querySelector('[data-view=entry]').click()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+          প্রথম এন্ট্রি যোগ করুন
+        </button>
+      </div>`;
+      return;
+    }
+    if(list.length === 0){
+      container.innerHTML = `<div class="empty-state">
+        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <p>এই অনুসন্ধানে কোনো ফলাফল পাওয়া যায়নি।</p>
+      </div>`;
+      return;
+    }
+    container.innerHTML = list.slice().reverse().map(e=>{
+      const sn = serialOf(e.id);
+      return `<div class="entry-row">
+        <div class="sn">${toBn(sn)}</div>
+        <div class="body">
+          <div class="u-name">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg>
+            ${escapeHtml(e.union)}
+          </div>
+          <div class="addr">${escapeHtml(e.address)}</div>
+        </div>
+        <div class="acts">
+          <button class="icon-btn" data-edit="${e.id}" title="সম্পাদনা">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </button>
+          <button class="icon-btn danger" data-del="${e.id}" title="মুছুন">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+
+    container.querySelectorAll('[data-edit]').forEach(b=>{
+      b.addEventListener('click', ()=> startEdit(b.dataset.edit));
+    });
+    container.querySelectorAll('[data-del]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        openModal('এন্ট্রি মুছে ফেলুন', 'এই এন্ট্রিটি স্থায়ীভাবে মুছে যাবে। আপনি কি নিশ্চিত?', ()=>{
+          entries = entries.filter(x=>x.id !== b.dataset.del);
+          persistEntries();
+          renderList();
+          showToast('এন্ট্রি মুছে ফেলা হয়েছে');
+        });
+      });
+    });
+  }
+
+  /* ---------------- Settings ---------------- */
+  function renderSettings(){
+    const wrap = document.getElementById('unionManageList');
+    if(unions.length === 0){
+      wrap.innerHTML = `<div class="empty-state" style="padding:34px 16px;">
+        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M14 9h1M14 13h1"/></svg></div>
+        <p>কোনো ইউনিয়ন যোগ করা হয়নি। নিচে থেকে যোগ করুন।</p>
+      </div>`;
+    } else {
+      wrap.innerHTML = unions.map(u=>{
+        const cnt = entries.filter(e=>e.union===u).length;
+        return `<div class="union-manage-item">
+          <div class="left">
+            <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg></div>
+            <span>${escapeHtml(u)}</span>
+          </div>
+          <div class="right">
+            <span class="cnt">${toBn(cnt)} এন্ট্রি</span>
+            <button class="icon-btn danger" data-rm-union="${escapeHtml(u)}" title="মুছুন">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+      wrap.querySelectorAll('[data-rm-union]').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const uName = b.dataset.rmUnion;
+          const cnt = entries.filter(e=>e.union===uName).length;
+          const msg = cnt > 0
+            ? `এই ইউনিয়নে ${toBn(cnt)}টি এন্ট্রি রয়েছে। ইউনিয়নটি তালিকা থেকে সরালেও পূর্বের এন্ট্রিগুলো সংরক্ষিত থাকবে। এগিয়ে যেতে চান?`
+            : 'এই ইউনিয়নটি তালিকা থেকে সরিয়ে ফেলা হবে। আপনি কি নিশ্চিত?';
+          openModal('ইউনিয়ন সরান', msg, ()=>{
+            unions = unions.filter(x=>x!==uName);
+            persistUnions();
+            renderSettings();
+            populateUnionSelects();
+            showToast('ইউনিয়ন সরানো হয়েছে');
+          });
+        });
+      });
+    }
+    document.getElementById('settingsTotalCount').textContent = toBn(entries.length);
+  }
+
+  document.getElementById('addUnionBtn').addEventListener('click', ()=>{
+    const inp = document.getElementById('newUnionInput');
+    const val = inp.value.trim();
+    if(!val){ showToast('ইউনিয়নের নাম লিখুন'); return; }
+    if(unions.includes(val)){ showToast('এই ইউনিয়ন ইতিমধ্যে যুক্ত আছে'); return; }
+    unions.push(val);
+    persistUnions();
+    inp.value = '';
+    renderSettings();
+    populateUnionSelects();
+    showToast('ইউনিয়ন যুক্ত হয়েছে');
+  });
+  document.getElementById('newUnionInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('addUnionBtn').click(); }
+  });
+  document.getElementById('clearAllBtn').addEventListener('click', ()=>{
+    openModal('সব ডেটা মুছুন', 'সকল এন্ট্রি স্থায়ীভাবে মুছে যাবে। ইউনিয়ন তালিকা অপরিবর্তিত থাকবে। এটি ফিরিয়ে আনা যাবে না।', ()=>{
+      entries = [];
+      persistEntries();
+      renderSettings();
+      renderDashboard();
+      showToast('সকল এন্ট্রি মুছে ফেলা হয়েছে');
+    });
+  });
+
+  /* ---------------- Word Export ----------------
+     Previously this built the .docx file using the "docx" library loaded
+     from a third-party CDN (jsdelivr). That script was not able to load in
+     this environment, so window.docx was always undefined and every export
+     attempt silently did nothing (or endlessly showed the "loading" toast).
+     This version builds a Word-compatible file directly as HTML with
+     Microsoft Office XML markers, which Word/LibreOffice/Google Docs open
+     natively as a real formatted document (with the table, colors and
+     Bengali font intact) — with zero external dependencies, so it always
+     works regardless of network/CDN availability. */
+  function buildAndDownloadDoc(list, label){
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('bn-BD', {year:'numeric', month:'long', day:'numeric'});
+
+    const rows = list.map((e, idx) => `
+        <tr>
+          <td style="text-align:center;">${toBn(idx+1)}</td>
+          <td>${escapeHtml(e.union)}</td>
+          <td>${escapeHtml(e.address)}</td>
+        </tr>`).join('');
+
+    const html = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<!--[if gte mso 9]>
+<xml>
+  <w:WordDocument>
+    <w:View>Print</w:View>
+    <w:Zoom>100</w:Zoom>
+    <w:DoNotOptimizeForBrowser/>
+  </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  @page{ size:auto; margin:2cm; }
+  body{ font-family:'Nirmala UI','Hind Siliguri',sans-serif; color:#152318; }
+  h1{ text-align:center; color:#0F4C30; font-size:22pt; margin-bottom:4px; }
+  .sub{ text-align:center; color:#5C7669; font-size:11pt; margin-bottom:22px; }
+  table{ border-collapse:collapse; width:100%; }
+  th, td{ border:1px solid #CCE0D2; padding:8px 10px; font-size:11pt; vertical-align:top; }
+  th{ background:#146C3F; color:#FFFFFF; font-weight:bold; }
+</style>
+</head>
+<body>
+  <h1>ইউনিয়ন তথ্য নিবন্ধন</h1>
+  <p class="sub">${escapeHtml(label)} — মোট এন্ট্রি: ${toBn(list.length)} — তৈরির তারিখ: ${dateStr}</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:10%;">ক্রম</th>
+        <th style="width:30%;">ইউনিয়ন</th>
+        <th style="width:60%;">স্থায়ী ঠিকানা</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows}
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+    try{
+      const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `union-entries-${now.getTime()}.doc`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(()=> URL.revokeObjectURL(url), 4000);
+      showToast('ওয়ার্ড ফাইল ডাউনলোড হয়েছে');
+    }catch(err){
+      console.error('export failed:', err);
+      showToast('এক্সপোর্টে সমস্যা হয়েছে, আবার চেষ্টা করুন');
+    }
+  }
+
+  /* ---------------- Export modal ----------------
+     Every export entry point (list toolbar, settings backup, bottom-nav
+     export) now opens the same modal so the person can explicitly pick
+     "সব ইউনিয়ন" (every union's data) or one specific union at export time,
+     instead of relying on whatever the list page's filter happened to be
+     set to. */
+  function openExportModal(defaultUnion){
+    if(entries.length === 0){ showToast('এক্সপোর্টের জন্য কোনো এন্ট্রি নেই'); return; }
+    const sel = document.getElementById('exportUnionSelect');
+    sel.innerHTML = `<option value="">সব ইউনিয়ন (সব ডেটা)</option>` +
+      unions.map(u=>`<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
+    sel.value = (defaultUnion && unions.includes(defaultUnion)) ? defaultUnion : '';
+    document.getElementById('exportModalOverlay').classList.add('show');
+  }
+  function closeExportModal(){
+    document.getElementById('exportModalOverlay').classList.remove('show');
+  }
+  document.getElementById('exportModalCancel').addEventListener('click', closeExportModal);
+  document.getElementById('exportModalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'exportModalOverlay') closeExportModal();
+  });
+  document.getElementById('exportModalConfirm').addEventListener('click', ()=>{
+    const uf = document.getElementById('exportUnionSelect').value;
+    const list = uf ? sortedEntries().filter(e=>e.union===uf) : sortedEntries();
+    if(list.length === 0){ showToast('এই ইউনিয়নে কোনো এন্ট্রি নেই'); return; }
+    buildAndDownloadDoc(list, uf ? ('ইউনিয়ন: ' + uf) : 'সকল ইউনিয়ন');
+    closeExportModal();
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
+    openExportModal(filterUnion.value);
+  });
+  document.getElementById('exportAllSettingsBtn').addEventListener('click', ()=>{
+    openExportModal('');
+  });
+  document.getElementById('bnavExport').addEventListener('click', ()=>{
+    openExportModal('');
+  });
+
+  /* ---------------- Init ---------------- */
+  function updateDateChip(){
+    const now = new Date();
+    document.getElementById('dateChip').textContent = now.toLocaleDateString('bn-BD', {year:'numeric', month:'long', day:'numeric'});
+  }
+  updateDateChip();
+  populateUnionSelects();
+  renderDashboard();
+  resetForm();
+  if(!storageOK){
+    setTimeout(()=> showToast('এই ব্রাউজারে স্থায়ী সংরক্ষণ বন্ধ আছে, তাই অ্যাপ বন্ধ করলে ডেটা মুছে যাবে'), 600);
+  }
+})();
+</script>
+</body>
+</html>
