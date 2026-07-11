@@ -7,8 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/file-saver/2.0.5/FileSaver.min.js"></script>
 <style>
   :root{
     --bg:#f3f8f4;
@@ -566,6 +564,26 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="exportModalOverlay">
+  <div class="modal-box">
+    <div class="icon-badge" style="background:var(--green-100);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--green-700)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l3 3 3-3M12 12v6"/></svg>
+    </div>
+    <h3>Word এক্সপোর্ট</h3>
+    <p>কোন ইউনিয়নের তথ্য এক্সপোর্ট করতে চান তা বেছে নিন।</p>
+    <div class="field" style="margin-bottom:6px;">
+      <label>ইউনিয়ন নির্বাচন করুন</label>
+      <select id="exportUnionSelect"><option value="">সব ইউনিয়ন (সব ডেটা)</option></select>
+    </div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="cancel" id="exportModalCancel">বাতিল</button>
+      <button class="confirm" id="exportModalConfirm" style="background:var(--green-700);">
+        এক্সপোর্ট করুন
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   "use strict";
@@ -574,14 +592,6 @@
   const STORAGE_KEY = "unionRegistry_entries_v1";
   const UNIONS_KEY  = "unionRegistry_unions_v1";
 
-  // Bug fix: raw localStorage.getItem/setItem calls can throw (private/incognito
-  // mode on some mobile browsers, file:// restrictions, storage quota, disabled
-  // DOM storage in some webviews). Previously, if persistEntries() threw, the
-  // rest of the submit handler (resetForm + switching to the list view) never
-  // ran — so the entry looked like it was never saved even though the tap was
-  // registered. These helpers never throw; if storage is unavailable the app
-  // keeps working for the current session and warns the person once instead of
-  // silently failing.
   let storageOK = true;
   function safeLoad(key){
     try{
@@ -679,11 +689,6 @@
   }
   document.querySelectorAll('[data-view]').forEach(el=>{
     el.addEventListener('click', ()=>{
-      // Bug fix: if the person was mid-edit and jumps to "নতুন এন্ট্রি" via nav/FAB
-      // instead of finishing that edit, the form previously kept showing the old
-      // entry's data because editingId was still set. Clear it on direct nav clicks
-      // (startEdit() calls setView() itself, not through this handler, so editing
-      // still works normally when triggered from the list).
       if(el.dataset.view === 'entry'){ editingId = null; }
       setView(el.dataset.view);
     });
@@ -694,12 +699,14 @@
     const sel = document.getElementById('unionSelect');
     const filt = document.getElementById('filterUnion');
     const currentSel = sel.value;
+    const currentFilt = filt.value;
     sel.innerHTML = unions.length
       ? unions.map(u=>`<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('')
       : `<option value="">প্রথমে সেটিংসে ইউনিয়ন যোগ করুন</option>`;
     if(unions.includes(currentSel)) sel.value = currentSel;
 
     filt.innerHTML = `<option value="">সব ইউনিয়ন</option>` + unions.map(u=>`<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
+    if(unions.includes(currentFilt)) filt.value = currentFilt;
   }
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -792,9 +799,6 @@
         showToast('নতুন এন্ট্রি সংরক্ষিত হয়েছে');
       }
     } catch(err){
-      // Even if something unexpected goes wrong, the entry stays in memory and
-      // the person still sees it land in the list instead of the form silently
-      // doing nothing.
       console.error('save failed:', err);
       showToast('সংরক্ষণে সমস্যা হয়েছে, তবে এন্ট্রিটি তালিকায় দেখাচ্ছে');
     }
@@ -946,96 +950,122 @@
     });
   });
 
-  /* ---------------- Word Export ---------------- */
-  async function buildAndDownloadDocx(list, label){
-    if(!window.docx){ showToast('এক্সপোর্ট লোড হচ্ছে, একটু পর আবার চেষ্টা করুন'); return; }
-    const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, WidthType, BorderStyle, ShadingType } = window.docx;
-
-    const FONT = "Nirmala UI";
-    const headerCellShade = { fill: "146C3F", type: ShadingType.CLEAR, color: "auto" };
-
-    function cell(text, opts={}){
-      return new TableCell({
-        width:{ size: opts.width || 20, type: WidthType.PERCENTAGE },
-        shading: opts.header ? headerCellShade : undefined,
-        margins:{ top:80, bottom:80, left:120, right:120 },
-        children:[ new Paragraph({
-          alignment: opts.center ? AlignmentType.CENTER : AlignmentType.LEFT,
-          children:[ new TextRun({ text: String(text), font: FONT, size: opts.header ? 21 : 20, bold: !!opts.header, color: opts.header ? "FFFFFF" : "111111" }) ]
-        })]
-      });
-    }
-
-    const headerRow = new TableRow({
-      tableHeader:true,
-      children:[
-        cell("ক্রম", {header:true, width:10, center:true}),
-        cell("ইউনিয়ন", {header:true, width:30}),
-        cell("স্থায়ী ঠিকানা", {header:true, width:60}),
-      ]
-    });
-
-    const dataRows = list.map((e, idx)=> new TableRow({
-      children:[
-        cell(idx+1, {width:10, center:true}),
-        cell(e.union, {width:30}),
-        cell(e.address, {width:60}),
-      ]
-    }));
-
-    const table = new Table({
-      width:{ size:100, type:WidthType.PERCENTAGE },
-      rows:[headerRow, ...dataRows],
-      borders:{
-        top:{style:BorderStyle.SINGLE, size:2, color:"CCE0D2"},
-        bottom:{style:BorderStyle.SINGLE, size:2, color:"CCE0D2"},
-        left:{style:BorderStyle.SINGLE, size:2, color:"CCE0D2"},
-        right:{style:BorderStyle.SINGLE, size:2, color:"CCE0D2"},
-        insideHorizontal:{style:BorderStyle.SINGLE, size:1, color:"E0EBE3"},
-        insideVertical:{style:BorderStyle.SINGLE, size:1, color:"E0EBE3"},
-      }
-    });
-
+  /* ---------------- Word Export ----------------
+     Previously this built the .docx file using the "docx" library loaded
+     from a third-party CDN (jsdelivr). That script was not able to load in
+     this environment, so window.docx was always undefined and every export
+     attempt silently did nothing (or endlessly showed the "loading" toast).
+     This version builds a Word-compatible file directly as HTML with
+     Microsoft Office XML markers, which Word/LibreOffice/Google Docs open
+     natively as a real formatted document (with the table, colors and
+     Bengali font intact) — with zero external dependencies, so it always
+     works regardless of network/CDN availability. */
+  function buildAndDownloadDoc(list, label){
     const now = new Date();
     const dateStr = now.toLocaleDateString('bn-BD', {year:'numeric', month:'long', day:'numeric'});
 
-    const doc = new Document({
-      sections:[{
-        properties:{},
-        children:[
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children:[ new TextRun({ text:"ইউনিয়ন তথ্য নিবন্ধন", font:FONT, bold:true, size:34, color:"0F4C30" }) ]
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing:{ after:200 },
-            children:[ new TextRun({ text: label + " — মোট এন্ট্রি: " + list.length + " — তৈরির তারিখ: " + dateStr, font:FONT, size:18, color:"5C7669" }) ]
-          }),
-          table
-        ]
-      }]
-    });
+    const rows = list.map((e, idx) => `
+        <tr>
+          <td style="text-align:center;">${toBn(idx+1)}</td>
+          <td>${escapeHtml(e.union)}</td>
+          <td>${escapeHtml(e.address)}</td>
+        </tr>`).join('');
 
-    const blob = await Packer.toBlob(doc);
-    const fname = `union-entries-${now.getTime()}.docx`;
-    saveAs(blob, fname);
-    showToast('ওয়ার্ড ফাইল ডাউনলোড হয়েছে');
+    const html = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<!--[if gte mso 9]>
+<xml>
+  <w:WordDocument>
+    <w:View>Print</w:View>
+    <w:Zoom>100</w:Zoom>
+    <w:DoNotOptimizeForBrowser/>
+  </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  @page{ size:auto; margin:2cm; }
+  body{ font-family:'Nirmala UI','Hind Siliguri',sans-serif; color:#152318; }
+  h1{ text-align:center; color:#0F4C30; font-size:22pt; margin-bottom:4px; }
+  .sub{ text-align:center; color:#5C7669; font-size:11pt; margin-bottom:22px; }
+  table{ border-collapse:collapse; width:100%; }
+  th, td{ border:1px solid #CCE0D2; padding:8px 10px; font-size:11pt; vertical-align:top; }
+  th{ background:#146C3F; color:#FFFFFF; font-weight:bold; }
+</style>
+</head>
+<body>
+  <h1>ইউনিয়ন তথ্য নিবন্ধন</h1>
+  <p class="sub">${escapeHtml(label)} — মোট এন্ট্রি: ${toBn(list.length)} — তৈরির তারিখ: ${dateStr}</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:10%;">ক্রম</th>
+        <th style="width:30%;">ইউনিয়ন</th>
+        <th style="width:60%;">স্থায়ী ঠিকানা</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows}
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+    try{
+      const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `union-entries-${now.getTime()}.doc`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(()=> URL.revokeObjectURL(url), 4000);
+      showToast('ওয়ার্ড ফাইল ডাউনলোড হয়েছে');
+    }catch(err){
+      console.error('export failed:', err);
+      showToast('এক্সপোর্টে সমস্যা হয়েছে, আবার চেষ্টা করুন');
+    }
   }
 
+  /* ---------------- Export modal ----------------
+     Every export entry point (list toolbar, settings backup, bottom-nav
+     export) now opens the same modal so the person can explicitly pick
+     "সব ইউনিয়ন" (every union's data) or one specific union at export time,
+     instead of relying on whatever the list page's filter happened to be
+     set to. */
+  function openExportModal(defaultUnion){
+    if(entries.length === 0){ showToast('এক্সপোর্টের জন্য কোনো এন্ট্রি নেই'); return; }
+    const sel = document.getElementById('exportUnionSelect');
+    sel.innerHTML = `<option value="">সব ইউনিয়ন (সব ডেটা)</option>` +
+      unions.map(u=>`<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
+    sel.value = (defaultUnion && unions.includes(defaultUnion)) ? defaultUnion : '';
+    document.getElementById('exportModalOverlay').classList.add('show');
+  }
+  function closeExportModal(){
+    document.getElementById('exportModalOverlay').classList.remove('show');
+  }
+  document.getElementById('exportModalCancel').addEventListener('click', closeExportModal);
+  document.getElementById('exportModalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'exportModalOverlay') closeExportModal();
+  });
+  document.getElementById('exportModalConfirm').addEventListener('click', ()=>{
+    const uf = document.getElementById('exportUnionSelect').value;
+    const list = uf ? sortedEntries().filter(e=>e.union===uf) : sortedEntries();
+    if(list.length === 0){ showToast('এই ইউনিয়নে কোনো এন্ট্রি নেই'); return; }
+    buildAndDownloadDoc(list, uf ? ('ইউনিয়ন: ' + uf) : 'সকল ইউনিয়ন');
+    closeExportModal();
+  });
+
   document.getElementById('exportBtn').addEventListener('click', ()=>{
-    const list = currentFilteredEntries();
-    if(list.length === 0){ showToast('এক্সপোর্টের জন্য কোনো এন্ট্রি নেই'); return; }
-    const uf = filterUnion.value;
-    buildAndDownloadDocx(list, uf ? ('ইউনিয়ন: ' + uf) : 'সকল ইউনিয়ন');
+    openExportModal(filterUnion.value);
   });
   document.getElementById('exportAllSettingsBtn').addEventListener('click', ()=>{
-    if(entries.length === 0){ showToast('এক্সপোর্টের জন্য কোনো এন্ট্রি নেই'); return; }
-    buildAndDownloadDocx(sortedEntries(), 'সম্পূর্ণ ব্যাকআপ');
+    openExportModal('');
   });
   document.getElementById('bnavExport').addEventListener('click', ()=>{
-    if(entries.length === 0){ showToast('এক্সপোর্টের জন্য কোনো এন্ট্রি নেই'); return; }
-    buildAndDownloadDocx(sortedEntries(), 'সম্পূর্ণ ব্যাকআপ');
+    openExportModal('');
   });
 
   /* ---------------- Init ---------------- */
@@ -1053,4 +1083,4 @@
 })();
 </script>
 </body>
- </html>
+  </html>
